@@ -9,27 +9,82 @@ import sys
 import logging
 import datetime
 
-# Add the current directory to the path to ensure modules can be found
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add a more robust mechanism to find agent modules
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, current_dir)  # Add current directory first in path
+
+# Add parent directory to path as well
+parent_dir = os.path.dirname(current_dir)
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+
+# Try alternative common directories where agents might be
+possible_paths = [
+    os.path.join(current_dir, 'agents'),
+    os.path.join(parent_dir, 'agents'),
+    os.path.join(os.getcwd(), 'agents')
+]
+
+for path in possible_paths:
+    if os.path.exists(path) and path not in sys.path:
+        sys.path.insert(0, path)
 
 # Import our agents
 try:
     from agents.content_strategy_agent import ContentStrategyAgent, VideoData, ContentAnalysisRequest
     from agents.content_scriptwriter_agent import ContentScriptwriterAgent, ScriptRequest
     from agents.visual_content_planner_agent import VisualContentPlannerAgent, VisualPlanRequest
+    print("Successfully imported agent modules")
 except ImportError as e:
     print(f"Error importing agents: {e}")
-    print("Trying alternative import path...")
+    print("Attempting to fix import...")
+    
+    # List all directories and their contents to help debug
+    all_dirs = []
+    for p in sys.path:
+        if os.path.exists(p):
+            all_dirs.append(f"Directory {p} exists, contains: {os.listdir(p) if os.path.isdir(p) else 'Not a directory'}")
+    print("\n".join(all_dirs))
+    
     try:
-        # Alternative import for when running from a different directory
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        sys.path.append(current_dir)
-        from agents.content_strategy_agent import ContentStrategyAgent, VideoData, ContentAnalysisRequest
-        from agents.content_scriptwriter_agent import ContentScriptwriterAgent, ScriptRequest
-        from agents.visual_content_planner_agent import VisualContentPlannerAgent, VisualPlanRequest
-        print("Successfully imported using alternative path")
-    except ImportError as e2:
-        print(f"Failed to import modules: {e2}")
+        # Last resort - create direct imports with exec
+        # This is not ideal but won't modify agent files
+        import importlib.util
+        
+        agent_files = {
+            'content_strategy_agent': os.path.join(current_dir, 'agents', 'content_strategy_agent.py'),
+            'content_scriptwriter_agent': os.path.join(current_dir, 'agents', 'content_scriptwriter_agent.py'),
+            'visual_content_planner_agent': os.path.join(current_dir, 'agents', 'visual_content_planner_agent.py')
+        }
+        
+        modules = {}
+        for name, path in agent_files.items():
+            if os.path.exists(path):
+                print(f"Loading {name} from {path}")
+                spec = importlib.util.spec_from_file_location(name, path)
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+                modules[name] = module
+                # Add to global namespace
+                globals()[name] = module
+        
+        # Extract needed classes
+        if 'content_strategy_agent' in modules:
+            ContentStrategyAgent = modules['content_strategy_agent'].ContentStrategyAgent
+            VideoData = modules['content_strategy_agent'].VideoData
+            ContentAnalysisRequest = modules['content_strategy_agent'].ContentAnalysisRequest
+        
+        if 'content_scriptwriter_agent' in modules:
+            ContentScriptwriterAgent = modules['content_scriptwriter_agent'].ContentScriptwriterAgent
+            ScriptRequest = modules['content_scriptwriter_agent'].ScriptRequest
+        
+        if 'visual_content_planner_agent' in modules:
+            VisualContentPlannerAgent = modules['visual_content_planner_agent'].VisualContentPlannerAgent
+            VisualPlanRequest = modules['visual_content_planner_agent'].VisualPlanRequest
+        
+        print("Successfully loaded modules directly")
+    except Exception as e3:
+        print(f"Failed all import methods: {e3}")
         raise
 
 # Enhanced VideoData model with niche-specific fields
