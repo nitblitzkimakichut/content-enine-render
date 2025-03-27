@@ -1,0 +1,1 @@
+web: gunicorn content_strategy_api:app -k uvicorn.workers.UvicornWorker 

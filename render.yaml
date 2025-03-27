@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: titanflow-ai
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn content_strategy_api:app -k uvicorn.workers.UvicornWorker
+    healthCheckPath: /health
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: PYTHON_VERSION
+        value: 3.10.8 

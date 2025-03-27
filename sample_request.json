@@ -1,0 +1,35 @@
+{
+  "videos": [
+    {
+      "title": "5 Morning Habits That Changed My Life",
+      "description": "I tried these 5 morning habits for 30 days and here's what happened...",
+      "views": 1500000,
+      "publishedAt": "2023-05-15",
+      "channel": "ProductivityGuru",
+      "problem": "Lack of productivity and energy in the morning",
+      "audience": "Young professionals and students",
+      "solution": "Simple morning routine habits that increase productivity",
+      "niche": "Productivity",
+      "sub_niche": "Morning routines",
+      "pain_points": "Feeling tired, unproductive, and overwhelmed",
+      "value_proposition": "Boost energy and productivity with simple morning habits"
+    },
+    {
+      "title": "You've Been Charging Your Phone Wrong",
+      "description": "This simple trick will make your battery last twice as long!",
+      "views": 2300000,
+      "publishedAt": "2023-06-02",
+      "channel": "TechHacks",
+      "problem": "Phone battery dies too quickly",
+      "audience": "Smartphone users of all ages",
+      "solution": "Proper charging techniques to extend battery life",
+      "niche": "Technology",
+      "sub_niche": "Smartphone tips",
+      "pain_points": "Frustration with short battery life, always needing a charger",
+      "value_proposition": "Double your battery life with this simple change"
+    }
+  ],
+  "platform": "TikTok",
+  "target_duration": 50,
+  "target_niche": "Productivity"
+} 
